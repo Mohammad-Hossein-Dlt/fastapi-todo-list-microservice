@@ -5,10 +5,10 @@ from src.domain.enums import Status, Priority
 from datetime import datetime, timezone
 
 class TaskDBModel(UpdateFromSchemaMixin, Base):
-    __tablename__ = "tasks"
+    __tablename__ = "Task"
 
     id = Column(Integer, nullable=False, unique=True, primary_key=True, autoincrement=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Text, nullable=False)
     title = Column(Text, nullable=False)
     description = Column(Text, nullable=False)
     status = Column(Enum(Status), nullable=False)

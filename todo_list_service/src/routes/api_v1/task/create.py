@@ -26,5 +26,4 @@ async def create(
         output = await create_usecase.execute(user, entity)
         return output.model_dump(mode="json")
     except AppBaseException as ex:
-        raise
         raise HTTPException(status_code=ex.status_code, detail=str(ex))

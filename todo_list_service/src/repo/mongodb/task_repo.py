@@ -44,6 +44,12 @@ class TaskMongodbRepo(ITaskRepo):
     ) ->  TaskModel:
         
         try:
+            
+            to_update: dict = task.model_dump_for_db(
+                exclude_none=True,
+                exclude_unset=True,
+            )
+            
             await TaskCollection.find_one(
                 And(
                     TaskCollection.id == task.id,
@@ -51,7 +57,7 @@ class TaskMongodbRepo(ITaskRepo):
                 ),
             ).update(
                 {
-                    "$set": task.model_dump(exclude_unset=True, exclude_none=True, exclude={"id", "user_id"}),
+                    "$set": to_update,
                 },
             )
             

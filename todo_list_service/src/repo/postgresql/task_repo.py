@@ -21,7 +21,7 @@ class TaskPgRepo(ITaskRepo):
     ) -> TaskModel:
         
         try:
-            new_task = TaskDBModel(**task.model_dump_for_db())
+            new_task = TaskDBModel(**task.model_dump_for_db(mode="json"))
             self.db.add(new_task)
             self.db.commit()
             return TaskModel.model_validate(new_task, from_attributes=True)
@@ -41,7 +41,7 @@ class TaskPgRepo(ITaskRepo):
             ).where(
                 and_(
                     TaskDBModel.id == task_id,
-                    TaskDBModel.user_id == user_id,
+                    TaskDBModel.user_id == str(user_id),
                 ),
             ).first()
             
@@ -55,21 +55,28 @@ class TaskPgRepo(ITaskRepo):
     ) ->  TaskModel:
         
         try:
+
+            to_update: dict = task.model_dump_for_db(
+                exclude_none=True,
+                exclude_unset=True,
+                mode="json",
+            )
+            
             self.db.query(
                 TaskDBModel   
             ).where(
                 and_(
                     TaskDBModel.id == task.id,
-                    TaskDBModel.user_id == task.user_id,
+                    TaskDBModel.user_id == str(task.user_id),
                 ),
             ).update(
-                task.model_dump(exclude_none=True, exclude_unset=True),
+                to_update,
                 synchronize_session='fetch',
             )
             
             self.db.commit()
             
-            return await self.get_by_id(task.id, task.user_id)
+            return await self.get_by_id(task.user_id, task.id)
         except:
             raise EntityNotFoundError(status_code=404, message="User or task not found")
         
@@ -80,7 +87,7 @@ class TaskPgRepo(ITaskRepo):
     ) -> bool:
         
         try:
-            task = await self.get_by_id(task_id, user_id)
+            task = await self.get_by_id(user_id, task_id)
             if task:
                 task = self.db.merge(TaskDBModel(**task.model_dump()))
                 
@@ -103,7 +110,7 @@ class TaskPgRepo(ITaskRepo):
             tasks = self.db.query(
                 TaskDBModel   
             ).where(
-                TaskDBModel.user_id == user_id,
+                TaskDBModel.user_id == str(user_id),
             ).all()
         
             return [ TaskModel.model_validate(t, from_attributes=True) for t in tasks ]

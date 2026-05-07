@@ -5,76 +5,48 @@ from typing import TypeAlias, Literal, ClassVar, Any
 db_stack_types: TypeAlias = Literal["no-sql", "sql"]
 
 class CustomBaseModel(BaseModel):
-    
-    aliases: ClassVar[dict[str, str]] = {
-        "id": "_id"
-    }
-        
+    aliases: ClassVar[dict[str, str]] = {"id": "_id"}
+
     model_config = ConfigDict(
         use_enum_values=True,
+        json_encoders={ObjectId: str},
     )
-    
-    def __setattr__(self, name, value):
-        
-        if isinstance(value, str):
-            value = value.strip()
-        
-        return super().__setattr__(name, value)
-    
+
     @model_validator(mode="before")
-    def alias_validator_before(cls, values) -> dict:
-                
-        if isinstance(values, dict):
-            
-            for k, v in cls.aliases.items():      
-                if v in values:
-                    values[k] = values.pop(v)
-                    
-        return values
-    
-    @model_validator(mode="before")
-    def str_validator_before(cls, values) -> dict:
-                
-        if isinstance(values, dict):
-            
-            for k, v in values.items():
-                if isinstance(v, str):
-                    values[k] = v.strip()
-                    
-                    if ObjectId.is_valid(v):
-                        values[k] = ObjectId(v)
-        
-        return values
-    
-    @field_validator("*")
-    def object_id_validator(cls, var):
-        if ObjectId.is_valid(var):
-            return ObjectId(var)
-        return var
+    @classmethod
+    def _apply_aliases(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            for field_name, alias in cls.aliases.items():
+                if alias in data:
+                    data[field_name] = data.pop(alias)
+        return data
+
+    @field_validator("*", mode="before")
+    @classmethod
+    def _objectid_from_str(cls, value: Any) -> Any:
+        if ObjectId.is_valid(value):
+            return ObjectId(value)
+        return value
     
     @field_serializer("*", when_used="json")
-    def object_id_serializer(self, var):
-        if ObjectId.is_valid(var):
-            return str(var)
-        return var
+    def _serialize_objectid(self, value: Any) -> Any:
+        if isinstance(value, ObjectId):
+            return str(value)
+        return value
 
     def model_dump_for_db(
         self,
         exclude_unset: bool = False,
         exclude_none: bool = False,
-        exclude: set = None,
+        exclude: set | None = None,
+        mode: Literal["python", "json"] = "python",
     ) -> dict[str, Any]:
         
-        if exclude:
-            exclude = exclude.union({"id", "_id"})
-        else:
-            exclude = {"id", "_id"}
-            
-        dumped = self.model_dump(
+        exclude = (exclude or set()) | {"id", "_id"}
+        
+        return self.model_dump(
             exclude_unset=exclude_unset,
             exclude_none=exclude_none,
             exclude=exclude,
-            mode="python",
+            mode=mode,
         )
-                
-        return dumped

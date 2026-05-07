@@ -1,12 +1,13 @@
 from src.infra.utils.custom_base_model import CustomBaseModel
 from src.domain.enums import Status, Priority
 from pydantic import ConfigDict, Field, model_validator
+from beanie import PydanticObjectId
 from datetime import datetime, timezone
 from typing import Self
 
 class TaskModel(CustomBaseModel):
-    id: int | str | None = None
-    user_id: int | str | None = None
+    id: int | PydanticObjectId | None = None
+    user_id: int | PydanticObjectId | None = None
     title: str | None = None
     description: str | None = None
     status: Status | None = None

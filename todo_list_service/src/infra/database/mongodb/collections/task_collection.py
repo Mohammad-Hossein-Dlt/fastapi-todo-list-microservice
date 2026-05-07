@@ -16,7 +16,7 @@ class TaskCollection(TaskModel, Document):
     deadline: datetime | None = None
     
     class Settings:
-        name = "Tasks"
+        name = "Task"
         
     @before_event(Update)
     def set_updated_at(self):

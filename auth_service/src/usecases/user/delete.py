@@ -20,7 +20,7 @@ class DeleteUser:
         try:
             user_id = str(user.id)
             status = await self.user_repo.delete_by_id(user_id)
-            return OperationOutput(id=user_id, request=f"delete/{user.role.value}", status=status)
+            return OperationOutput(id=user_id, request=f"delete/{user.role}", status=status)
         except AppBaseException:
             raise
         except:
