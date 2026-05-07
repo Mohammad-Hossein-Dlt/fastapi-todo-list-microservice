@@ -5,11 +5,16 @@ from typing import TypeAlias, Literal, ClassVar, Any
 db_stack_types: TypeAlias = Literal["no-sql", "sql"]
 
 class CustomBaseModel(BaseModel):
-    aliases: ClassVar[dict[str, str]] = {"id": "_id"}
+
+    aliases: ClassVar[dict[str, str]] = {
+        "id": "_id",
+    }
 
     model_config = ConfigDict(
         use_enum_values=True,
-        json_encoders={ObjectId: str},
+        json_encoders={
+            ObjectId: str,
+        },
     )
 
     @model_validator(mode="before")
