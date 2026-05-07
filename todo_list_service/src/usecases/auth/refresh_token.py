@@ -1,4 +1,4 @@
-from src.infra.external_api.interface.Iauth import IAuthService
+from src.gateway.internal.interface.Iauth_service import IAuthService
 from src.repo.interface.Iauth_repo import IAuthRepo
 from src.domain.schemas.auth.auth_credentials import AuthCredentials
 from src.infra.exceptions.exceptions import OperationFailureException
@@ -13,21 +13,20 @@ class RefreshToken:
         self.auth_service = auth_service
         self.auth_repo = auth_repo
         
-    def execute(
+    async def execute(
         self,
-        auth_credentials: AuthCredentials,
+        credentials: AuthCredentials,
     ) -> AuthCredentials:
 
-        response = self.auth_service.refresh_token(auth_credentials)
+        response = await self.auth_service.refresh_token(credentials)
         
         access_token, refresh_token = response["access_token"], response["refresh_token"]
         
-        auth_credentials.access_token = access_token        
-        auth_credentials.refresh_token = refresh_token
+        credentials.access_token = access_token        
+        credentials.refresh_token = refresh_token
                 
         try:
-            self.auth_repo.save_user_auth_credentials(auth_credentials)
-            return auth_credentials
+            return await self.auth_repo.save_auth_credentials(credentials)
         except:
             raise OperationFailureException(500, "Internal server error")
 

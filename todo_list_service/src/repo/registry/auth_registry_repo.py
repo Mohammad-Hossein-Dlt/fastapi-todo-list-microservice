@@ -14,7 +14,7 @@ class AuthRegistryRepo(IAuthRepo):
         self.request = request
         self.response = response   
         
-    def save_user_auth_credentials(
+    async def save_auth_credentials(
         self,
         credentials: AuthCredentials,
     ) -> AuthCredentials:
@@ -25,7 +25,7 @@ class AuthRegistryRepo(IAuthRepo):
                                 
         return credentials
 
-    def get_user_auth_credentials(
+    async def get_auth_credentials(
         self,
     ) -> AuthCredentials:
         

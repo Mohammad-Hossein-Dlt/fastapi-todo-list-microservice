@@ -1,19 +1,19 @@
 from . import (
     _router,
-    create_task,
-    get_all_user_tasks,
-    get_task,
-    update_task,
-    delete_all_tasks,
-    delete_task,
+    create,
+    get_by_id,
+    update,
+    delete_by_id,
+    get_by_user_id,
+    delete_by_user_id,
 )
 
 __all__ = [
     "_router",
-    "create_task",
-    "get_all_user_tasks",
-    "get_task",
-    "update_task",
-    "delete_all_tasks",
-    "delete_task",
+    "create",
+    "get_by_id",
+    "update",
+    "delete_by_id",
+    "get_by_user_id",
+    "delete_by_user_id",
 ]

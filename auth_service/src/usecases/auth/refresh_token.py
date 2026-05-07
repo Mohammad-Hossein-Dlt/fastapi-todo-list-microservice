@@ -1,5 +1,6 @@
 from src.infra.auth.jwt_handler import JWTHandler
 from src.domain.schemas.auth.jwt_payload import JWTPayload
+from src.domain.schemas.user.user_model import UserModel
 from src.models.schemas.user.login_user_output import LoginUserOutput
 
 class RefreshToken:
@@ -13,20 +14,20 @@ class RefreshToken:
     
     async def execute(
         self,
-        payload: JWTPayload,
+        user: UserModel,
     ) -> LoginUserOutput:
         
         access_payload = JWTPayload(
-            user_id = payload.user_id,
-            type="access"
+            user_id = str(user.id),
+            type="access",
         )
         
         refresh_payload = JWTPayload(
-            user_id = payload.user_id,
-            type="refresh"
+            user_id = str(user.id),
+            type="refresh",
         )
         
         access_token = self.jwt_handler.create_jwt_token(access_payload)
         refresh_token = self.jwt_handler.create_jwt_token(refresh_payload)
         
-        return LoginUserOutput(access_token=access_token, refresh_token=refresh_token).model_dump(mode="json")
+        return LoginUserOutput(access_token=access_token, refresh_token=refresh_token)

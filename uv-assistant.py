@@ -51,23 +51,26 @@ def run_cmd(
     
     if return_result:
 
-        proc = subprocess.run(
+        proc = subprocess.Popen(
             cmd,
             cwd=str(cwd) if cwd else None,
             env=env,
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
         )
         
-        if proc.returncode != 0:
-            print(proc.stderr.strip())
+        result, err = proc.communicate()
+        
+        if err:
+            print(err.strip())
                 
-        return proc.stdout
+        return result
     else:
         subprocess.run(
             cmd,
             cwd=str(cwd) if cwd else None,
-            shell=True,
+            env=env,
         )
 
 def name_only(
@@ -137,6 +140,7 @@ def ensure_venv_available(
             [
                 "uv",
                 "sync",
+                "--active",
                 *mirror,
             ],
         )
@@ -176,8 +180,8 @@ def check_requirements(
                 "uv",
                 "add",
                 "pipdeptree",
-                *mirror,
                 "--active",
+                *mirror,
             ],
             cwd=dir,
         )
@@ -196,6 +200,7 @@ def get_top_packages(dir: Path):
         cwd=dir,
         return_result=True,
     )
+    
     data: list[dict] = json.loads(result)
     
     deps = set()
@@ -219,6 +224,7 @@ def get_top_packages(dir: Path):
 
 def process(
     dir: Path,
+    cwd: Path,
 ) -> None:
         
     pyproject = dir / "pyproject.toml"
@@ -227,7 +233,7 @@ def process(
     ensure_pyproject(dir)
         
     requirements.write_text(
-        get_top_packages(dir),
+        get_top_packages(cwd),
         encoding="utf-8",
     )
 
@@ -255,10 +261,10 @@ def process(
             "add",
             "-r",
             "requirements.txt",
-            *mirror,
             "--active",
             # "--no-sync",
             "--frozen",
+            *mirror,
         ],
         cwd=dir,
     )
@@ -281,12 +287,13 @@ def remove_uv_lock(
     print(f"uv.lock removed in {dir.name}")
             
 def main() -> None:
+    
+    cwd = Path.cwd()
+    paths_list = list(discover_dirs(cwd))
 
     ensure_uv_available()
-    ensure_venv_available(Path.cwd())
-    check_requirements(Path.cwd())
-
-    paths_list = list(discover_dirs(Path.cwd()))
+    ensure_venv_available(cwd)
+    check_requirements(cwd)
 
     if not paths_list:
         return
@@ -294,13 +301,18 @@ def main() -> None:
     for path in paths_list:
         try:
             print(path)
-            process(path)
+            process(path, cwd)
             remove_uv_lock(path)
             print()
         except Exception as e:
             raise
             # raise SystemExit(f"Processing Error for {path.name}:\n{e}\n") from e
-    
+            
+    for path in paths_list:
+        for pycache_dir in path.rglob("__pycache__"):
+            if pycache_dir.is_dir():
+                shutil.rmtree(pycache_dir)
+                
     remove_uv_lock(Path.cwd())       
 
 if __name__ == "__main__":

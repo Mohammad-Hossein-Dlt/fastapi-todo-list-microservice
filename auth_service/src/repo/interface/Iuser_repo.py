@@ -4,28 +4,35 @@ from src.domain.schemas.user.user_model import UserModel
 class IUserRepo(ABC):
         
     @abstractmethod
-    async def insert_user(
+    async def create(
         user: UserModel,
     ) -> UserModel:
     
         raise NotImplementedError
     
     @abstractmethod
-    async def get_user_by_id(
+    async def get_by_id(
         user_id: str,
-    ) ->  UserModel:
+    ) -> UserModel:
     
         raise NotImplementedError
     
     @abstractmethod
-    async def get_user_by_username(
+    async def get_by_username(
         username: str,
     ) -> UserModel:
         raise NotImplementedError
     
     @abstractmethod
-    async def delete_user(
+    async def delete_by_id(
         user_id: str,
+    ) -> bool:
+    
+        raise NotImplementedError
+    
+    @abstractmethod
+    async def delete_by_username(
+        username: str,
     ) -> bool:
     
         raise NotImplementedError

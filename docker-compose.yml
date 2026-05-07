@@ -1,112 +1,106 @@
 services:
-
   # Nginx
   nginx:
     image: nginx:latest
     restart: always
     depends_on:
-      - auth-service1
-      - auth-service2
-      - todo-list-service1
-      - todo-list-service2
+      - auth-service
+      # - auth-service2
+      - todo-list-service
+      # - todo-list-service2
     ports:
-      - ${EXTERNAL_FASTAPI_PORT}:80
+      - 80:80
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
 
   # Auth service -> 2 node
-  auth-service1:
+  auth-service:
     working_dir: /app
     build:
       context: ./auth_service
       dockerfile: Dockerfile
-    container_name: auth_service1
+    container_name: auth_service
     restart: always
+    ports:
+      - 81:80
     env_file:
       - .env
     depends_on:
-      - mongo-db
-      - postgres-db
-    expose:
-      - ${INTERNAL_FASTAPI_PORT}
-    command: ["fastapi", "run", "./src/main.py", "--port", "${INTERNAL_FASTAPI_PORT}"]
+      - mongodb-service
+      - postgres-service
 
-  auth-service2:
-    working_dir: /app
-    build:
-      context: ./auth_service
-      dockerfile: Dockerfile
-    container_name: auth_service2
-    restart: always
-    env_file:
-      - .env
-    depends_on:
-      - mongo-db
-      - postgres-db
-    expose:
-      - ${INTERNAL_FASTAPI_PORT}
-    command: ["fastapi", "run", "./src/main.py", "--port", "${INTERNAL_FASTAPI_PORT}"]
+  # auth-service2:
+  #   working_dir: /app
+  #   build:
+  #     context: ./auth_service
+  #     dockerfile: Dockerfile
+  #   container_name: auth_service2
+  #   restart: always
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - mongodb-service
+  #     - postgres-service
 
   # Todo-list service -> 2 node
-  todo-list-service1:
+  todo-list-service:
     working_dir: /app
     build:
       context: ./todo_list_service
       dockerfile: Dockerfile
-    container_name: todo_list_service1
+    container_name: todo_list_service
     restart: always
+    ports:
+      - 82:80
     env_file:
       - .env
     depends_on:
-      - mongo-db
-      - postgres-db
-    expose:
-      - ${INTERNAL_FASTAPI_PORT}
-    command: ["fastapi", "run", "./src/main.py", "--port", "${INTERNAL_FASTAPI_PORT}"]
+      - mongodb-service
+      - postgres-service
 
-  todo-list-service2:
-    working_dir: /app
-    build:
-      context: ./todo_list_service
-      dockerfile: Dockerfile
-    container_name: todo_list_service2
-    restart: always
-    env_file:
-      - .env
-    depends_on:
-      - mongo-db
-      - postgres-db
-    expose:
-      - ${INTERNAL_FASTAPI_PORT}
-    command: ["fastapi", "run", "./src/main.py", "--port", "${INTERNAL_FASTAPI_PORT}"]
+  # todo-list-service2:
+  #   working_dir: /app
+  #   build:
+  #     context: ./todo_list_service
+  #     dockerfile: Dockerfile
+  #   container_name: todo_list_service2
+  #   restart: always
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - mongodb-service
+  #     - postgres-service
 
   # Mongo-db
-  mongo-db:
+  mongodb-service:
     image: mongo
     container_name: mongo-db
     restart: always
-    expose:
-      - 27017
     ports:
       - 27017:27017
-    env_file:
-      - .env
     volumes:
       - mongo_data:/data/db
+    env_file:
+      - .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB__USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB__PASSWORD}
 
   # Postgresql
-  postgres-db:
+  postgres-service:
     image: postgres
     container_name: postgres-db
     restart: always
-    expose:
-      - 5432
     ports:
       - 54032:5432
+    volumes:
+      - pgdata:/var/lib/postgresql
     env_file:
       - .env
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES__USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES__PASSWORD}
+      POSTGRES_DB: ${POSTGRES__DB_NAME}
 
   pgadmin:
     image: dpage/pgadmin4
@@ -117,7 +111,7 @@ services:
     env_file:
       - .env
     depends_on:
-      - postgres-db
+      - postgres-service
 
 volumes:
   pgdata:

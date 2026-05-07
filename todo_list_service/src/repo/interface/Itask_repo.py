@@ -4,44 +4,44 @@ from src.domain.schemas.task.task_model import TaskModel
 class ITaskRepo(ABC):
         
     @abstractmethod
-    async def insert_task(
+    async def create(
         task: TaskModel,
     ) -> TaskModel:
     
         raise NotImplementedError
     
     @abstractmethod
-    async def get_all_tasks(
+    async def get_by_id(
         user_id: str,
-    ) ->  list[TaskModel]:
-    
-        raise NotImplementedError
-    
-    @abstractmethod
-    async def get_task_by_id(
         task_id: str,
-        user_id: str,
     ) ->  TaskModel:
     
         raise NotImplementedError
     
     @abstractmethod
-    async def update_task(
+    async def update(
         task: TaskModel,
     ) ->  TaskModel:
     
         raise NotImplementedError
     
     @abstractmethod
-    async def delete_all_task(
+    async def delete_by_id(
         user_id: str,
+        task_id: str,
     ) -> bool:
     
         raise NotImplementedError
     
     @abstractmethod
-    async def delete_task(
-        task_id: str,
+    async def get_by_user_id(
+        user_id: str,
+    ) ->  list[TaskModel]:
+    
+        raise NotImplementedError
+    
+    @abstractmethod
+    async def delete_by_user_id(
         user_id: str,
     ) -> bool:
     

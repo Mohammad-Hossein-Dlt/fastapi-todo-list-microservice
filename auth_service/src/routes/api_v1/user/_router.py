@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
 router = APIRouter(
-    prefix="/user",
+    prefix="/user/self",
     tags=["User"]
 )

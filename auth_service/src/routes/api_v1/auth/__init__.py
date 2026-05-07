@@ -1,13 +1,13 @@
 from . import (
     _router,
-    register_user,
-    login_user,
+    register,
+    login,
     refresh_token,
 )
 
 __all__ = [
     "_router",
-    "register_user",
-    "login_user",
+    "register",
+    "login",
     "refresh_token",
 ]

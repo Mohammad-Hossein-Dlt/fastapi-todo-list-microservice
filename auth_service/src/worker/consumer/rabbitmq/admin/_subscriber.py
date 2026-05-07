@@ -1,0 +1,1 @@
+from src.worker.consumer.rabbitmq.broker import subscriber as admin_subscriber

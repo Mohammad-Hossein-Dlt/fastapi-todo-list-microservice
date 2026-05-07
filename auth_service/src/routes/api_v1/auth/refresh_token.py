@@ -1,10 +1,10 @@
 from ._router import router 
 from fastapi import Depends, HTTPException
 from src.routes.http_response.responses import ResponseMessage
-from src.domain.schemas.auth.jwt_payload import JWTPayload
 from src.infra.auth.jwt_handler import JWTHandler
-from src.routes.depends.auth_depend import get_jwt_handler
-from src.routes.depends.auth_depend import get_refresh_token_depend
+from src.routes.depends.auth_depend import jwt_handler_depend
+from src.domain.schemas.user.user_model import UserModel
+from src.routes.depends.auth_depend import refresh_token_depend
 from src.usecases.auth.refresh_token import RefreshToken
 from src.infra.exceptions.exceptions import AppBaseException
 
@@ -16,12 +16,13 @@ from src.infra.exceptions.exceptions import AppBaseException
         **ResponseMessage.HTTP_500_INTERNAL_SERVER_ERROR("Internal server error"),
     }
 )
-async def get_user(
-    jwt_handler: JWTHandler = Depends(get_jwt_handler),
-    user: JWTPayload = Depends(get_refresh_token_depend),
+async def refresh_token(
+    jwt_handler: JWTHandler = Depends(jwt_handler_depend),
+    user: UserModel = Depends(refresh_token_depend),
 ):
     try:
         refresh_token_usecase = RefreshToken(jwt_handler)
-        return await refresh_token_usecase.execute(user)
+        output = await refresh_token_usecase.execute(user)
+        return output.model_dump(mode="json")
     except AppBaseException as ex:
         raise HTTPException(status_code=ex.status_code, detail=str(ex))
