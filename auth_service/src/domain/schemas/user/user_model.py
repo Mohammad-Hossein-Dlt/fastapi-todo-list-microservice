@@ -6,6 +6,7 @@ from src.domain.enums import Role
 from typing import Self
 
 class UserModel(CustomBaseModel):
+    
     id: int | PydanticObjectId | None = None
     role: Role | None = None
     name: str | None = None

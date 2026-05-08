@@ -14,7 +14,7 @@ class TaskMongodbRepo(ITaskRepo):
         
         try:
             new_task = await TaskCollection.insert(
-                TaskCollection(**task.model_dump_for_db()),
+                TaskCollection(**task.model_dump_for_db(dump_for="create")),
             )
             return TaskModel.model_validate(new_task, from_attributes=True)
         except: raise
@@ -46,6 +46,7 @@ class TaskMongodbRepo(ITaskRepo):
         try:
             
             to_update: dict = task.model_dump_for_db(
+                dump_for="update",
                 exclude_none=True,
                 exclude_unset=True,
             )

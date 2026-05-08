@@ -1,9 +1,8 @@
 from src.domain.schemas.auth.auth_credentials import AuthCredentials
 from src.infra.utils.custom_base_model import CustomBaseModel
+from pydantic import Field
 from beanie import PydanticObjectId
 from datetime import datetime
-
-from pydantic import Field
 
 class UserModel(CustomBaseModel):
         

@@ -21,7 +21,7 @@ class TaskPgRepo(ITaskRepo):
     ) -> TaskModel:
         
         try:
-            new_task = TaskDBModel(**task.model_dump_for_db(mode="json"))
+            new_task = TaskDBModel(**task.model_dump_for_db(dump_for="create", mode="json"))
             self.db.add(new_task)
             self.db.commit()
             return TaskModel.model_validate(new_task, from_attributes=True)
@@ -57,6 +57,7 @@ class TaskPgRepo(ITaskRepo):
         try:
 
             to_update: dict = task.model_dump_for_db(
+                dump_for="update",
                 exclude_none=True,
                 exclude_unset=True,
                 mode="json",

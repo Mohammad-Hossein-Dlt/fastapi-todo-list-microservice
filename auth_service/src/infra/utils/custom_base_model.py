@@ -41,6 +41,7 @@ class CustomBaseModel(BaseModel):
 
     def model_dump_for_db(
         self,
+        dump_for: Literal["create", "update"],
         exclude_unset: bool = False,
         exclude_none: bool = False,
         exclude: set | None = None,
@@ -48,6 +49,9 @@ class CustomBaseModel(BaseModel):
     ) -> dict[str, Any]:
         
         exclude = (exclude or set()) | {"id", "_id"}
+        
+        if dump_for == "update":
+            exclude.add("created_at")
         
         return self.model_dump(
             exclude_unset=exclude_unset,
