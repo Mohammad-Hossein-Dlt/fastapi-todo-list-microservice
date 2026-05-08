@@ -1,8 +1,6 @@
 from pydantic import BaseModel, ConfigDict, model_validator, field_validator, field_serializer
 from bson.objectid import ObjectId
-from typing import TypeAlias, Literal, ClassVar, Any
-
-db_stack_types: TypeAlias = Literal["no-sql", "sql"]
+from typing import Literal, ClassVar, Any
 
 class CustomBaseModel(BaseModel):
 
