@@ -1,8 +1,6 @@
 from src.domain.schemas.user.user_model import UserModel
 from src.domain.enums import Role
-from pydantic import Field
 from beanie import Document, PydanticObjectId, before_event, Update
-from bson import ObjectId
 from datetime import datetime, timezone
 
 class UserCollection(UserModel, Document):

@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 
 class TaskCollection(TaskModel, Document):
     
-    id: PydanticObjectId | None = None
+    id: PydanticObjectId = None
     user_id: int | PydanticObjectId
     title: str
     description: str
