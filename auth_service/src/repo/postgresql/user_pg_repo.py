@@ -24,7 +24,7 @@ class UserPgRepo(IUserRepo):
             raise InvalidRequestException(409, f"User '{user.username}' already exist")
         except EntityNotFoundError:
             try:
-                user = UserDBModel(**user.model_dump_for_db())
+                user = UserDBModel(**user.model_dump_for_db(mode="json"))
                 self.db.add(user)
                 self.db.commit()
                 return UserModel.model_validate(user, from_attributes=True)
